@@ -1,637 +1,429 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-[#0c0c0c]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LionLamb phonic sounds story box</title>
+    <title>LionLamb Phonic Sounds Story Box</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1A2C42; /* Dark Blue */
-            color: #FFFFFF; /* White Text */
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
         .container {
-            max-width: 960px;
-            background-color: #2C3E50; /* A slightly lighter dark blue for the card */
+            max-width: 800px;
         }
         .message-box {
             position: fixed;
             top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 1rem 2rem;
-            background-color: #4CAF50; /* Green for success */
+            right: 20px;
+            background-color: #4CAF50;
             color: white;
-            border-radius: 0.5rem;
+            padding: 15px;
+            border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
+            z-index: 100;
         }
-        .fade-in {
-            display: block;
-            animation: fadeIn 0.5s forwards;
-        }
-        .fade-out {
-            animation: fadeOut 0.5s forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .loading-animation {
-            border: 4px solid #4A6076;
-            border-top: 4px solid #FF7F11; /* Vibrant Orange */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .message-box.show {
+            opacity: 1;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="bg-[#0c0c0c] text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-    <div class="message-box" id="message-box"></div>
+    <div id="message-box" class="message-box"></div>
 
-    <div class="container mx-auto p-6 shadow-xl rounded-2xl flex flex-col md:flex-row gap-8">
+    <div class="container bg-[#15273c] shadow-xl rounded-2xl p-6 md:p-10 flex flex-col items-center">
+        <div class="w-full flex justify-center mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-orange-400 text-center">LionLamb Phonic Sounds Story Box</h1>
+        </div>
 
-        <!-- Controls Section -->
-        <div class="w-full md:w-1/2 p-6 bg-gray-900 bg-opacity-10 rounded-xl shadow-inner">
-            <h1 class="text-3xl font-bold mb-6 text-center">LionLamb phonic sounds story box</h1>
-            <p class="text-gray-300 text-sm mb-6 text-center">
-                Enter a dominant sound, and I'll create a story, image, and audio about a child's adventure.
+        <div id="api-key-setup" class="w-full space-y-4">
+            <p class="text-sm text-center">
+                To begin, please enter your API key. This will be stored locally in your browser.
             </p>
-            <div class="flex flex-col gap-4 mb-6">
-                <div class="flex flex-col">
-                    <label for="story-type" class="text-gray-300 mb-2">Select Story Type:</label>
-                    <select id="story-type" class="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors bg-gray-800 text-white">
-                        <option value="adventure">Children's Adventure</option>
-                        <option value="folktale">African Folktale</option>
-                        <option value="animal">African Animal Story</option>
-                    </select>
-                </div>
-                <div class="flex flex-col">
-                    <label for="phonics-sound" class="text-gray-300 mb-2">Or, Select a Phonics Sound:</label>
-                    <select id="phonics-sound" class="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors bg-gray-800 text-white">
-                        <option value="">-- No Phonics Sound --</option>
-                        <optgroup label="Group 1">
-                            <option value="s">s</option>
-                            <option value="a">a</option>
-                            <option value="t">t</option>
-                            <option value="i">i</option>
-                            <option value="p">p</option>
-                            <option value="n">n</option>
-                        </optgroup>
-                        <optgroup label="Group 2">
-                            <option value="c">c/k</option>
-                            <option value="e">e</option>
-                            <option value="h">h</option>
-                            <option value="r">r</option>
-                            <option value="m">m</option>
-                            <option value="d">d</option>
-                        </optgroup>
-                        <optgroup label="Group 3">
-                            <option value="g">g</option>
-                            <option value="o">o</option>
-                            <option value="u">u</option>
-                            <option value="l">l</option>
-                            <option value="f">f</option>
-                            <option value="b">b</option>
-                        </optgroup>
-                        <optgroup label="Group 4">
-                            <option value="ai">ai</option>
-                            <option value="j">j</option>
-                            <option value="oa">oa</option>
-                            <option value="ie">ie</option>
-                            <option value="ee">ee</option>
-                            <option value="or">or</option>
-                        </optgroup>
-                        <optgroup label="Group 5">
-                            <option value="z">z</option>
-                            <option value="w">w</option>
-                            <option value="ng">ng</option>
-                            <option value="v">v</option>
-                            <option value="oo">oo (book)</option>
-                            <option value="oo_long">oo (moon)</option>
-                        </optgroup>
-                        <optgroup label="Group 6">
-                            <option value="y">y</option>
-                            <option value="x">x</option>
-                            <option value="ch">ch</option>
-                            <option value="sh">sh</option>
-                            <option value="th_soft">th (soft)</option>
-                            <option value="th_hard">th (hard)</option>
-                        </optgroup>
-                        <optgroup label="Group 7">
-                            <option value="qu">qu</option>
-                            <option value="ou">ou</option>
-                            <option value="oi">oi</option>
-                            <option value="ue">ue</option>
-                            <option value="er">er</option>
-                            <option value="ar">ar</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <input type="text" id="prompt-input" placeholder="e.g., A gentle rain on the roof" class="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors bg-gray-800 text-white placeholder-gray-400">
-                <button id="generate-button" class="bg-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 transition-colors shadow-lg">
-                    Generate
-                </button>
-            </div>
+            <input type="password" id="api-key-input" placeholder="Enter your Google AI Studio API Key" class="w-full p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300">
+            <button id="save-key-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-orange-400 transition duration-300 ease-in-out transform hover:scale-105">
+                Save Key
+            </button>
+        </div>
 
-            <!-- Loading States -->
-            <div id="loading-section" class="flex flex-col items-center justify-center gap-4 hidden">
-                <div class="loading-animation"></div>
-                <p id="loading-text" class="text-gray-400">Generating...</p>
-            </div>
+        <div id="app-interface" class="w-full space-y-4 hidden">
+            <p class="text-sm text-center">
+                Generate a short story by entering a prompt or selecting a phonic sound.
+            </p>
 
-            <!-- Generated Story and Audio Controls -->
-            <div id="story-container" class="mt-8 hidden">
-                <h2 class="text-2xl font-semibold mb-4">The Story & Sound</h2>
-                <div class="relative mb-4">
-                    <div id="story-content" class="bg-gray-800 p-4 rounded-lg border border-gray-700 text-gray-200 leading-relaxed min-h-[150px]"></div>
-                    <button id="copy-button" class="absolute bottom-2 right-2 p-2 bg-gray-600 rounded-full hover:bg-gray-500 transition-colors" title="Copy to clipboard">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div id="audio-controls" class="flex justify-center gap-4 hidden">
-                    <button id="play-button" class="bg-orange-500 text-white font-semibold py-2 px-4 rounded-full hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
-                        Play
-                    </button>
-                    <button id="pause-button" class="bg-gray-500 text-white font-semibold py-2 px-4 rounded-full hover:bg-gray-600 transition-colors hidden">
-                        Pause
-                    </button>
-                </div>
+            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                <input type="text" id="prompt-input" placeholder="e.g., A playful dog barking" class="flex-1 w-full p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300">
+                <select id="phonics-select" class="w-full md:w-auto p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300">
+                    <option value="" disabled selected>Or choose a sound...</option>
+                    <option value="a">/a/</option>
+                    <option value="b">/b/</option>
+                    <option value="c">/c/</option>
+                    <option value="d">/d/</option>
+                    <option value="e">/e/</option>
+                    <option value="f">/f/</option>
+                    <option value="g">/g/</option>
+                    <option value="h">/h/</option>
+                    <option value="i">/i/</option>
+                    <option value="j">/j/</option>
+                    <option value="k">/k/</option>
+                    <option value="l">/l/</option>
+                    <option value="m">/m/</option>
+                    <option value="n">/n/</option>
+                    <option value="o">/o/</option>
+                    <option value="p">/p/</option>
+                    <option value="q">/q/</option>
+                    <option value="r">/r/</option>
+                    <option value="s">/s/</option>
+                    <option value="t">/t/</option>
+                    <option value="u">/u/</option>
+                    <option value="v">/v/</option>
+                    <option value="w">/w/</option>
+                    <option value="x">/x/</option>
+                    <option value="y">/y/</option>
+                    <option value="z">/z/</option>
+                    <option value="sh">/sh/</option>
+                    <option value="ch">/ch/</option>
+                    <option value="th">/th/</option>
+                    <option value="wh">/wh/</option>
+                    <option value="ai">/ai/</option>
+                    <option value="ee">/ee/</option>
+                    <option value="ie">/ie/</option>
+                    <option value="oa">/oa/</option>
+                    <option value="ue">/ue/</option>
+                    <option value="oo">/oo/</option>
+                </select>
+            </div>
+            
+            <button id="generate-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-orange-400 transition duration-300 ease-in-out transform hover:scale-105">
+                Generate Story
+            </button>
+        </div>
+
+        <div id="loader" class="hidden my-6">
+            <div class="flex flex-col items-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-400"></div>
+                <p class="mt-4 text-center">Generating your story and image...</p>
             </div>
         </div>
 
-        <!-- Generated Image Section -->
-        <div class="w-full md:w-1/2 p-6 bg-gray-900 bg-opacity-10 rounded-xl shadow-inner flex flex-col items-center justify-center">
-            <h2 class="text-2xl font-semibold mb-4 text-center">The Scene</h2>
-            <div class="relative w-full aspect-square bg-gray-700 rounded-xl overflow-hidden shadow-lg">
-                <img id="image-display" src="https://placehold.co/800x800/2C3E50/FFFFFF?text=Your+image+will+appear+here" alt="Generated scene" class="w-full h-full object-cover">
+        <div id="result-container" class="hidden w-full mt-8 space-y-6">
+            <div class="flex justify-center">
+                <img id="story-image" src="" alt="Generated Story Image" class="w-full h-auto rounded-lg shadow-lg max-h-96 object-contain">
+            </div>
+
+            <div class="relative bg-blue-900 p-6 rounded-lg shadow-inner">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-orange-400">Your Story</h2>
+                    <div class="flex space-x-2">
+                        <button id="audio-button" class="text-orange-400 hover:text-orange-500 transition duration-300">
+                            <i class="fas fa-volume-up fa-2x"></i>
+                        </button>
+                        <button id="copy-button" class="text-gray-300 hover:text-gray-100 transition duration-300">
+                            <i class="fas fa-copy fa-2x"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="story-text" class="text-lg leading-relaxed max-h-64 overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const generateButton = document.getElementById('generate-button');
-            const copyButton = document.getElementById('copy-button');
-            const promptInput = document.getElementById('prompt-input');
-            const storyTypeSelect = document.getElementById('story-type');
-            const phonicsSoundSelect = document.getElementById('phonics-sound');
-            const imageDisplay = document.getElementById('image-display');
-            const storyContent = document.getElementById('story-content');
-            const loadingSection = document.getElementById('loading-section');
-            const storyContainer = document.getElementById('story-container');
-            const messageBox = document.getElementById('message-box');
-            const playButton = document.getElementById('play-button');
-            const pauseButton = document.getElementById('pause-button');
-            const audioControls = document.getElementById('audio-controls');
-            
-            const API_KEY = "";
-            let audio = new Audio();
-            let currentAudioUrl = null;
-            
-            // Function to show a temporary message box
-            function showMessage(message, type = 'success') {
-                messageBox.textContent = message;
-                if (type === 'success') {
-                    messageBox.style.backgroundColor = '#4CAF50';
-                } else if (type === 'error') {
-                    messageBox.style.backgroundColor = '#f44336';
-                }
-                messageBox.classList.add('fade-in');
-                setTimeout(() => {
-                    messageBox.classList.add('fade-out');
-                    messageBox.classList.remove('fade-in');
-                }, 3000);
-            }
+        const API_KEY_STORAGE_KEY = 'lionlamb_api_key';
+        let API_KEY = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
 
-            // Function to handle API call with exponential backoff
-            async function fetchWithExponentialBackoff(url, options, retries = 3, delay = 1000) {
+        const GENERATE_TEXT_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        const GENERATE_IMAGE_API = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`;
+        const GENERATE_AUDIO_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
+        
+        const promptInput = document.getElementById('prompt-input');
+        const phonicsSelect = document.getElementById('phonics-select');
+        const generateButton = document.getElementById('generate-button');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('result-container');
+        const storyImage = document.getElementById('story-image');
+        const storyText = document.getElementById('story-text');
+        const audioButton = document.getElementById('audio-button');
+        const copyButton = document.getElementById('copy-button');
+        const messageBox = document.getElementById('message-box');
+        const apiKeySetup = document.getElementById('api-key-setup');
+        const appInterface = document.getElementById('app-interface');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveKeyButton = document.getElementById('save-key-button');
+
+        let audioInstance;
+        let storyContent = "";
+
+        // Helper functions
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check for API key on page load
+        if (API_KEY) {
+            apiKeySetup.classList.add('hidden');
+            appInterface.classList.remove('hidden');
+        } else {
+            apiKeySetup.classList.remove('hidden');
+            appInterface.classList.add('hidden');
+        }
+
+        // Save key button logic
+        saveKeyButton.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                localStorage.setItem(API_KEY_STORAGE_KEY, key);
+                API_KEY = key;
+                apiKeySetup.classList.add('hidden');
+                appInterface.classList.remove('hidden');
+                showMessage("API key saved successfully!", "success");
+            } else {
+                showMessage("Please enter a valid API key.", "error");
+            }
+        });
+
+        // Retry with exponential backoff
+        async function fetchWithBackoff(url, options, retries = 3) {
+            for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, options);
-                    if (!response.ok) {
-                        console.error(`API response failed: Status ${response.status} - ${response.statusText}`);
-                        if (response.status === 429 && retries > 0) {
-                            console.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            return fetchWithExponentialBackoff(url, options, retries - 1, delay * 2);
-                        }
-                        throw new Error(`API call failed with status: ${response.status}`);
-                    }
-                    return response;
-                } catch (error) {
-                    console.error(`Fetch error. Details: `, error);
-                    if (retries > 0) {
-                        console.warn(`Fetch error. Retrying in ${delay}ms...`);
+                    if (response.status === 429) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        console.warn(`Rate limit exceeded. Retrying in ${delay / 1000}s...`);
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        return fetchWithExponentialBackoff(url, options, retries - 1, delay * 2);
+                        continue;
                     }
-                    throw error;
-                }
-            }
-
-            // Function to generate the image
-            async function generateImage(storyText) {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`;
-                const payload = {
-                    instances: {
-                        prompt: `A cheerful, simple, and brightly colored digital painting that illustrates the following story: "${storyText}". The illustration should be suitable for a young child, depicting Nigerian children in a recognizable setting.`
-                    },
-                    parameters: {
-                        sampleCount: 1
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                };
-                const options = {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                };
-
-                try {
-                    const response = await fetchWithExponentialBackoff(url, options);
-                    const result = await response.json();
-                    const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
-                    if (base64Data) {
-                        imageDisplay.src = `data:image/png;base64,${base64Data}`;
-                    } else {
-                        throw new Error('Image generation failed: No data received.');
-                    }
+                    return await response.json();
                 } catch (error) {
-                    console.error('Error generating image:', error);
-                    imageDisplay.src = `https://placehold.co/800x800/2C3E50/FFFFFF?text=Error`;
-                    throw error;
+                    if (i === retries - 1) {
+                        throw error;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    console.warn(`Fetch failed. Retrying in ${delay / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
+        }
 
-            // Function to generate the story
-            async function generateStory(prompt, storyType, phonicsSound) {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
-                
-                // Character name mapping for phonics sounds
-                const phonicsNames = {
-                    's': ['Sade', 'Segun', 'Sola'],
-                    'a': ['Ayo', 'Amara', 'Adaobi'],
-                    't': ['Tunde', 'Tayo', 'Tolu'],
-                    'i': ['Ifeanyi', 'Imani', 'Ibukun'],
-                    'p': ['Papa', 'Patrice', 'Paul'],
-                    'n': ['Ngozi', 'Nneka', 'Nkem'],
-                    'c': ['Chika', 'Chidi', 'Chinedu'],
-                    'e': ['Emeka', 'Ebuka', 'Ebele'],
-                    'h': ['Halima', 'Hassan', 'Habiba'],
-                    'r': ['Remi', 'Rukayat', 'Rasheed'],
-                    'm': ['Musa', 'Mama', 'Mojisola'],
-                    'd': ['Damilola', 'Demola', 'Dupe'],
-                    'g': ['Ganiyu', 'Gbenga', 'Gideon'],
-                    'o': ['Obi', 'Olu', 'Olabode'],
-                    'u': ['Uche', 'Uzor', 'Ugochi'],
-                    'l': ['Lola', 'Lanre', 'Lekan'],
-                    'f': ['Femi', 'Folake', 'Funke'],
-                    'b': ['Buchi', 'Bolu', 'Bisi'],
-                    'ai': ['Aisha', 'Ayo'],
-                    'j': ['Jide', 'Jumoke', 'John'],
-                    'oa': ['Olamide'],
-                    'ie': ['Ifeanyi'],
-                    'ee': ['Efe', 'Ekemini'],
-                    'or': ['Omoregie'],
-                    'z': ['Zainab', 'Zaria'],
-                    'w': ['Wasiu', 'Wunmi'],
-                    'ng': ['Ngozi', 'Nneka'],
-                    'v': ['Victor'],
-                    'oo': ['Olu', 'Oluchi'],
-                    'oo_long': ['Olu'],
-                    'y': ['Yemi', 'Yusuf'],
-                    'x': ['Xavier'],
-                    'ch': ['Chika', 'Chinedu'],
-                    'sh': ['Shola', 'Sade'],
-                    'th_soft': ['Thaddeus'],
-                    'th_hard': ['Theophilus'],
-                    'qu': ['Queen'],
-                    'ou': ['Olumide'],
-                    'oi': ['Oyin'],
-                    'ue': ['Uche'],
-                    'er': ['Erastus'],
-                    'ar': ['Arinze']
-                };
-
-                let systemPrompt = "";
-                let userQuery = "";
-
-                if (phonicsSound) {
-                    const characterNames = phonicsNames[phonicsSound] || [];
-                    const mainCharacter = characterNames[Math.floor(Math.random() * characterNames.length)];
-
-                    let phonicsPrompt = `The story should focus on the sound "${phonicsSound}". All character names should begin with "${phonicsSound}", and the story must use many words that start with this sound.`;
-                    if (phonicsSound === 'oo' || phonicsSound === 'oo_long') {
-                         phonicsPrompt = `The story should focus on the phonics sound "oo". Use words with this sound and a character named "${mainCharacter}". The short sound is like in 'book' and the long sound is like in 'moon'.`;
-                    }
-                    if (phonicsSound === 'th_soft' || phonicsSound === 'th_hard') {
-                         phonicsPrompt = `The story should focus on the phonics sound "th". Use words with this sound and a character named "${mainCharacter}".`;
-                    }
-                    
-                    switch(storyType) {
-                        case 'adventure':
-                            systemPrompt = `You are a professional children's storyteller. Write a very simple, short, single-paragraph story (around 50 words) suitable for a 3-year-old. The story should be cheerful and describe a child's adventure or a real-life event. Use the character name "${mainCharacter}" and describe a setting that is familiar to a Nigerian child, like a market or a compound. The story must sound natural, and the sentences should be very simple and short. ${phonicsPrompt}`;
-                            break;
-                        case 'folktale':
-                            systemPrompt = `You are a traditional African storyteller. Write a very simple, short, single-paragraph folktale (around 50 words) suitable for a 3-year-old. The story should be cheerful and feature a clear moral or lesson. The story's main character should be a person and can use the name "${mainCharacter}". It must have a traditional African setting and sound. The sentences should be very simple and short. ${phonicsPrompt}`;
-                            break;
-                        case 'animal':
-                            const animalNames = ["Tortoise", "Lion", "Elephant", "Zebra", "Giraffe", "Monkey", "Hyena", "Cheetah", "Gazelle", "Warthog"];
-                            const animalCharacter = animalNames[Math.floor(Math.random() * animalNames.length)];
-                            const animalName = `${animalCharacter.charAt(0).toUpperCase() + animalCharacter.slice(1)} the ${animalCharacter.toLowerCase()}`;
-                            systemPrompt = `You are a traditional African storyteller. Write a very simple, short, single-paragraph story (around 50 words) suitable for a 3-year-old. The story should be cheerful and feature African animals as characters. The main character should be "${mainCharacter}" and should be personified with a human-like name and characteristics. The story should use many words that start with the phoneme "${phoneme}" to emphasize the sound. The setting must be the African savanna or a jungle. The sentences should be very simple and short. ${phonicsPrompt}`;
-                            break;
-                    }
-                    userQuery = `Write a story that focuses on the sound "${phonicsSound}".`;
-                } else if (prompt) {
-                    const words = prompt.split(' ');
-                    let characterName = null;
-                    let soundPrompt = prompt;
-
-                    if (words.length > 0 && words[0].length > 1 && words[0][0] === words[0][0].toUpperCase()) {
-                        characterName = words[0];
-                        soundPrompt = words.slice(1).join(' ');
-                    } else {
-                        soundPrompt = prompt;
-                    }
-                    
-                    let mainCharacter = characterName;
-                    const phoneme = characterName ? characterName.charAt(0).toLowerCase() : null;
-
-                    switch(storyType) {
-                        case 'adventure':
-                            systemPrompt = `You are a professional children's storyteller. Write a very simple, short, single-paragraph story (around 50 words) suitable for a 3-year-old. The story should be cheerful and describe a child's adventure or a real-life event, weaving in the prominent sound: "${soundPrompt}". Use the character name "${mainCharacter}" and describe a setting that is familiar to a Nigerian child, like a market or a compound. The story must sound natural, and the sentences should be very simple and short.`;
-                            break;
-                        case 'folktale':
-                            systemPrompt = `You are a traditional African storyteller. Write a very simple, short, single-paragraph folktale (around 50 words) suitable for a 3-year-old. The story should be cheerful and feature a clear moral or lesson. The story's main character should be a person and can use the name "${mainCharacter}". The story should use words that start with the phoneme "${phoneme}" to make the story focused. It must have a traditional African setting and sound. The sentences should be very simple and short.`;
-                            break;
-                        case 'animal':
-                            systemPrompt = `You are a traditional African storyteller. Write a very simple, short, single-paragraph story (around 50 words) suitable for a 3-year-old. The story should be cheerful and feature African animals as characters. The main character should be "${mainCharacter}" and should be personified with a human-like name and characteristics. The story should use many words that start with the phoneme "${phoneme}" to emphasize the sound. The setting must be the African savanna or a jungle. The sentences should be very simple and short.`;
-                            break;
-                    }
-                    userQuery = `Write a story about "${prompt}".`;
-                } else {
-                    showMessage('Please enter a prompt or select a phonics sound.', 'error');
-                    return null;
+        async function generateStory(prompt) {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: {
+                    parts: [{ text: "You are a friendly and creative children's story writer. Write a short, simple, engaging story for children in Nigeria. Use culturally familiar settings, names like Halima or Femi, and common objects found in a Nigerian village. The story should be 2-3 paragraphs long and focus on the provided prompt or a phonic sound." }]
                 }
-
-
-                const payload = {
-                    contents: [{ parts: [{ text: userQuery }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                };
-                const options = {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                };
-
-                try {
-                    const response = await fetchWithExponentialBackoff(url, options);
-                    const result = await response.json();
-                    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) {
-                        storyContent.textContent = text;
-                        storyContainer.classList.remove('hidden');
-                    } else {
-                         throw new Error('Story generation failed: No content received.');
-                    }
-                    return text;
-                } catch (error) {
-                    console.error('Error generating story:', error);
-                    storyContent.textContent = 'An error occurred during story generation.';
-                    throw error;
-                }
-            }
-
-            // Helper functions for audio processing
-            function base64ToArrayBuffer(base64) {
-                const binaryString = window.atob(base64);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                }
-                return bytes.buffer;
-            }
-
-            function pcmToWav(pcmData, sampleRate) {
-                const pcm16 = new Int16Array(pcmData);
-                const numChannels = 1;
-                const headerLength = 44;
-                const dataLength = pcm16.length * 2;
-                const buffer = new ArrayBuffer(headerLength + dataLength);
-                const view = new DataView(buffer);
-
-                // Write WAV header
-                const writeString = (view, offset, string) => {
-                    for (let i = 0; i < string.length; i++) {
-                        view.setUint8(offset + i, string.charCodeAt(i));
-                    }
-                };
-                writeString(view, 0, 'RIFF'); // RIFF identifier
-                view.setUint32(4, 36 + dataLength, true); // file size
-                writeString(view, 8, 'WAVE'); // WAVE identifier
-                writeString(view, 12, 'fmt '); // fmt chunk
-                view.setUint32(16, 16, true); // chunk size (16 for PCM)
-                view.setUint16(20, 1, true); // audio format (1 for PCM)
-                view.setUint16(22, numChannels, true); // num channels
-                view.setUint32(24, sampleRate, true); // sample rate
-                view.setUint32(28, sampleRate * numChannels * 2, true); // byte rate
-                view.setUint16(32, numChannels * 2, true); // block align
-                view.setUint16(34, 16, true); // bits per sample
-                writeString(view, 36, 'data'); // data chunk
-                view.setUint32(40, dataLength, true); // data size
-
-                // Write PCM data
-                let offset = headerLength;
-                for (let i = 0; i < pcm16.length; i++) {
-                    view.setInt16(offset, pcm16[i], true);
-                    offset += 2;
-                }
-
-                return new Blob([view], { type: 'audio/wav' });
-            }
-
-            // Function to generate and play audio
-            async function generateAudio(storyText) {
-                if (!storyText) return;
-
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
-                const payload = {
-                    contents: [{
-                        parts: [{ text: storyText }]
-                    }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            voiceConfig: {
-                                prebuiltVoiceConfig: { voiceName: "Iapetus" }
-                            }
-                        }
-                    },
-                    model: "gemini-2.5-flash-preview-tts"
-                };
-                const options = {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                };
-
-                try {
-                    const response = await fetchWithExponentialBackoff(url, options);
-                    const result = await response.json();
-                    const part = result?.candidates?.[0]?.content?.parts?.[0];
-                    const audioData = part?.inlineData?.data;
-                    const mimeType = part?.inlineData?.mimeType;
-
-                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                        const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
-                        const pcmData = base64ToArrayBuffer(audioData);
-                        const wavBlob = pcmToWav(new Int16Array(pcmData), sampleRate);
-                        
-                        if (currentAudioUrl) {
-                           URL.revokeObjectURL(currentAudioUrl);
-                        }
-                        currentAudioUrl = URL.createObjectURL(wavBlob);
-                        audio.src = currentAudioUrl;
-                        
-                        playButton.disabled = false;
-                        audioControls.classList.remove('hidden');
-
-                    } else {
-                        throw new Error('Audio generation failed: No data received.');
-                    }
-                } catch (error) {
-                    console.error('Error generating audio:', error);
-                    showMessage('An error occurred during audio generation.', 'error');
-                    throw error;
-                }
-            }
-
-            function playAudio() {
-                audio.play();
-                playButton.classList.add('hidden');
-                pauseButton.classList.remove('hidden');
-            }
-
-            function pauseAudio() {
-                audio.pause();
-                playButton.classList.remove('hidden');
-                pauseButton.classList.add('hidden');
-            }
-            
-            audio.onended = () => {
-                playButton.classList.remove('hidden');
-                pauseButton.classList.add('hidden');
             };
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+            const result = await fetchWithBackoff(GENERATE_TEXT_API, options);
+            return result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Failed to generate story.';
+        }
 
-            // Main generation function
-            async function handleGeneration() {
-                const prompt = promptInput.value.trim();
-                const storyType = storyTypeSelect.value;
-                const phonicsSound = phonicsSoundSelect.value;
+        async function generateImage(story) {
+            let characterGender = "a child";
+            let characterName = "the main character";
+            if (story.includes("Halima")) {
+                characterGender = "a young girl";
+                characterName = "Halima";
+            } else if (story.includes("Femi")) {
+                characterGender = "a young boy";
+                characterName = "Femi";
+            }
+            const imagePrompt = `A vibrant children's book illustration in a Nigerian village. Show ${characterGender}, a child named ${characterName}, tending to hens and chickens in a warm, friendly and cheerful style.`;
+            
+            const payload = {
+                instances: { prompt: imagePrompt },
+                parameters: { "sampleCount": 1 }
+            };
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+            const result = await fetchWithBackoff(GENERATE_IMAGE_API, options);
+            const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+            return base64Data ? `data:image/png;base64,${base64Data}` : '';
+        }
 
-                if (!prompt && !phonicsSound) {
-                    showMessage('Please enter a prompt or select a phonics sound.', 'error');
-                    return;
-                }
-                
-                audioControls.classList.add('hidden');
-                playButton.disabled = true;
-                pauseAudio();
-                
-                loadingSection.classList.remove('hidden');
-                generateButton.disabled = false;
-                
-                try {
-                    const storyText = await generateStory(prompt, storyType, phonicsSound);
-                    if (storyText) {
-                        await Promise.all([
-                            generateImage(storyText),
-                            generateAudio(storyText)
-                        ]);
-                        showMessage('Content generated successfully!');
+        async function generateAudio(text) {
+            const payload = {
+                contents: [{ parts: [{ text: text }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Iapetus" }
+                        }
                     }
-                } catch (error) {
-                    console.error('Generation failed:', error);
-                    showMessage('Content generation failed. Please try again.', 'error');
-                } finally {
-                    loadingSection.classList.add('hidden');
-                    generateButton.disabled = false;
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+            const result = await fetchWithBackoff(GENERATE_AUDIO_API, options);
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+            const audioData = part?.inlineData?.data;
+            const mimeType = part?.inlineData?.mimeType;
+
+            if (audioData && mimeType) {
+                const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
+                const pcmData = base64ToArrayBuffer(audioData);
+                const pcm16 = new Int16Array(pcmData);
+                const wavBlob = pcmToWav(pcm16, sampleRate);
+                return URL.createObjectURL(wavBlob);
+            }
+            return null;
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const wavData = new ArrayBuffer(44 + pcmData.length * 2);
+            const view = new DataView(wavData);
+            let offset = 0;
+
+            function writeString(str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset++, str.charCodeAt(i));
                 }
             }
 
-            // Event Listeners
-            generateButton.addEventListener('click', handleGeneration);
-            promptInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleGeneration();
-                }
-            });
-            playButton.addEventListener('click', playAudio);
-            pauseButton.addEventListener('click', pauseAudio);
+            function writeUint32(val) {
+                view.setUint32(offset, val, true);
+                offset += 4;
+            }
 
-            // Copy to clipboard function
-            copyButton.addEventListener('click', () => {
-                const storyText = storyContent.textContent;
-                if (!storyText) {
-                    showMessage('Nothing to copy!', 'error');
-                    return;
-                }
-                
-                const tempTextarea = document.createElement('textarea');
-                tempTextarea.value = storyText;
-                document.body.appendChild(tempTextarea);
-                tempTextarea.select();
-                try {
-                    document.execCommand('copy');
-                    showMessage('Story copied to clipboard!');
-                } catch (err) {
-                    console.error('Failed to copy text:', err);
-                    showMessage('Failed to copy. Please try again manually.', 'error');
-                }
-                document.body.removeChild(tempTextarea);
-            });
+            function writeUint16(val) {
+                view.setUint16(offset, val, true);
+                offset += 2;
+            }
 
-            // Logic to handle when to use prompt vs. phonics sound
-            phonicsSoundSelect.addEventListener('change', () => {
-                if (phonicsSoundSelect.value) {
-                    promptInput.disabled = true;
-                    promptInput.value = '';
+            writeString('RIFF');
+            writeUint32(36 + pcmData.length * 2);
+            writeString('WAVE');
+            writeString('fmt ');
+            writeUint32(16);
+            writeUint16(1);
+            writeUint16(1);
+            writeUint32(sampleRate);
+            writeUint32(sampleRate * 2);
+            writeUint16(2);
+            writeUint16(16);
+            writeString('data');
+            writeUint32(pcmData.length * 2);
+
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(offset, pcmData[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+        
+        // Event Listeners
+        generateButton.addEventListener('click', async () => {
+            // Check for API key before attempting API calls
+            if (!API_KEY) {
+                showMessage("Please enter and save your API key first.", "error");
+                return;
+            }
+
+            const promptValue = promptInput.value.trim();
+            const phonicSound = phonicsSelect.value;
+            let combinedPrompt;
+
+            if (promptValue && phonicSound) {
+                combinedPrompt = `A short story for children about ${promptValue}, with a special focus on words containing the '${phonicSound}' sound.`;
+            } else if (promptValue) {
+                combinedPrompt = `A short story for children about ${promptValue}.`;
+            } else if (phonicSound) {
+                combinedPrompt = `A short story for children with a special focus on words containing the '${phonicSound}' sound.`;
+            } else {
+                showMessage("Please enter a prompt or select a phonic sound.", "error");
+                return;
+            }
+
+            // Hide previous results and show loader
+            resultContainer.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                // Generate content in sequence
+                const story = await generateStory(combinedPrompt);
+                const imageBase64 = await generateImage(story);
+
+                storyContent = story.replace(/\*\*/g, ''); // Remove Markdown bolding
+                storyText.innerHTML = storyContent.replace(/\n/g, '<br><br>');
+                storyImage.src = imageBase64 || "https://placehold.co/600x400/3182CE/FFFFFF?text=Image+Not+Available";
+
+                // Generate audio after the story is received
+                const audioUrl = await generateAudio(storyContent);
+                if (audioUrl) {
+                    if (audioInstance) audioInstance.pause();
+                    audioInstance = new Audio(audioUrl);
+                    audioButton.disabled = false;
                 } else {
-                    promptInput.disabled = false;
+                    audioButton.disabled = true;
+                    showMessage("Audio generation failed.", "error");
                 }
-            });
 
-            promptInput.addEventListener('input', () => {
-                if (promptInput.value.length > 0) {
-                    phonicsSoundSelect.disabled = true;
-                    phonicsSoundSelect.value = '';
-                } else {
-                    phonicsSoundSelect.disabled = false;
-                }
-            });
+                // Show results
+                loader.classList.add('hidden');
+                resultContainer.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error during generation:", error);
+                loader.classList.add('hidden');
+                resultContainer.classList.add('hidden');
+                showMessage("An error occurred during generation. Please try again.", "error");
+            }
+        });
+
+        audioButton.addEventListener('click', () => {
+            if (audioInstance) {
+                audioInstance.play();
+            } else {
+                showMessage("Audio not available.", "error");
+            }
+        });
+
+        copyButton.addEventListener('click', () => {
+            if (storyContent) {
+                const el = document.createElement('textarea');
+                el.value = storyContent;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showMessage("Story copied to clipboard!");
+            }
         });
     </script>
 </body>
