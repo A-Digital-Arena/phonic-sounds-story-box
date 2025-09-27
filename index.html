@@ -15,6 +15,10 @@
         .container {
             max-width: 800px;
         }
+        /* Grey-white text color */
+        .text-gray-200 {
+            color: #E5E7EB; /* A soft, off-white color */
+        }
         .message-box {
             position: fixed;
             top: 20px;
@@ -39,27 +43,18 @@
 
     <div class="container bg-[#15273c] shadow-xl rounded-2xl p-6 md:p-10 flex flex-col items-center">
         <div class="w-full flex justify-center mb-6">
+            <!-- Title with no emboss/shadow, only bold text -->
             <h1 class="text-4xl md:text-5xl font-bold text-orange-400 text-center">LionLamb Phonic Sounds Story Box</h1>
         </div>
 
-        <div id="api-key-setup" class="w-full space-y-4">
-            <p class="text-sm text-center">
-                To begin, please enter your API key. This will be stored locally in your browser.
-            </p>
-            <input type="password" id="api-key-input" placeholder="Enter your Google AI Studio API Key" class="w-full p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300">
-            <button id="save-key-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-orange-400 transition duration-300 ease-in-out transform hover:scale-105">
-                Save Key
-            </button>
-        </div>
-
-        <div id="app-interface" class="w-full space-y-4 hidden">
-            <p class="text-sm text-center">
+        <div id="app-interface" class="w-full space-y-4">
+            <p class="text-gray-200 text-sm text-center font-normal">
                 Generate a short story by entering a prompt or selecting a phonic sound.
             </p>
 
             <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                <input type="text" id="prompt-input" placeholder="e.g., A playful dog barking" class="flex-1 w-full p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300">
-                <select id="phonics-select" class="w-full md:w-auto p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300">
+                <input type="text" id="prompt-input" placeholder="e.g., A playful dog barking" class="flex-1 w-full p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300 font-normal">
+                <select id="phonics-select" class="w-full md:w-auto p-3 rounded-lg border border-blue-700 bg-blue-950 text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition duration-300 font-normal">
                     <option value="" disabled selected>Or choose a sound...</option>
                     <option value="a">/a/</option>
                     <option value="b">/b/</option>
@@ -108,7 +103,7 @@
         <div id="loader" class="hidden my-6">
             <div class="flex flex-col items-center">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-400"></div>
-                <p class="mt-4 text-center">Generating your story and image...</p>
+                <p class="mt-4 text-gray-200 text-center font-normal">Generating your story and image...</p>
             </div>
         </div>
 
@@ -129,18 +124,15 @@
                         </button>
                     </div>
                 </div>
-                <div id="story-text" class="text-lg leading-relaxed max-h-64 overflow-y-auto"></div>
+                <!-- Ensuring the text here is not bolded and uses the grey-white color -->
+                <div id="story-text" class="text-gray-200 text-lg leading-relaxed max-h-64 overflow-y-auto font-normal"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const API_KEY_STORAGE_KEY = 'lionlamb_api_key';
-        let API_KEY = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
-
-        const GENERATE_TEXT_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
-        const GENERATE_IMAGE_API = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`;
-        const GENERATE_AUDIO_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
+        // NOTE: API Key is intentionally left blank to be handled by the platform environment
+        const API_KEY = ""; 
         
         const promptInput = document.getElementById('prompt-input');
         const phonicsSelect = document.getElementById('phonics-select');
@@ -152,10 +144,6 @@
         const audioButton = document.getElementById('audio-button');
         const copyButton = document.getElementById('copy-button');
         const messageBox = document.getElementById('message-box');
-        const apiKeySetup = document.getElementById('api-key-setup');
-        const appInterface = document.getElementById('app-interface');
-        const apiKeyInput = document.getElementById('api-key-input');
-        const saveKeyButton = document.getElementById('save-key-button');
 
         let audioInstance;
         let storyContent = "";
@@ -170,29 +158,6 @@
             }, 3000);
         }
 
-        // Check for API key on page load
-        if (API_KEY) {
-            apiKeySetup.classList.add('hidden');
-            appInterface.classList.remove('hidden');
-        } else {
-            apiKeySetup.classList.remove('hidden');
-            appInterface.classList.add('hidden');
-        }
-
-        // Save key button logic
-        saveKeyButton.addEventListener('click', () => {
-            const key = apiKeyInput.value.trim();
-            if (key) {
-                localStorage.setItem(API_KEY_STORAGE_KEY, key);
-                API_KEY = key;
-                apiKeySetup.classList.add('hidden');
-                appInterface.classList.remove('hidden');
-                showMessage("API key saved successfully!", "success");
-            } else {
-                showMessage("Please enter a valid API key.", "error");
-            }
-        });
-
         // Retry with exponential backoff
         async function fetchWithBackoff(url, options, retries = 3) {
             for (let i = 0; i < retries; i++) {
@@ -205,7 +170,8 @@
                         continue;
                     }
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        // Throw specific error for visibility
+                        throw new Error(`HTTP error! status: ${response.status} - ${await response.text()}`);
                     }
                     return await response.json();
                 } catch (error) {
@@ -220,6 +186,7 @@
         }
 
         async function generateStory(prompt) {
+            const GENERATE_TEXT_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
                 systemInstruction: {
@@ -235,17 +202,11 @@
             return result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Failed to generate story.';
         }
 
-        async function generateImage(story) {
-            let characterGender = "a child";
-            let characterName = "the main character";
-            if (story.includes("Halima")) {
-                characterGender = "a young girl";
-                characterName = "Halima";
-            } else if (story.includes("Femi")) {
-                characterGender = "a young boy";
-                characterName = "Femi";
-            }
-            const imagePrompt = `A vibrant children's book illustration in a Nigerian village. Show ${characterGender}, a child named ${characterName}, tending to hens and chickens in a warm, friendly and cheerful style.`;
+        async function generateImage(storyText) {
+            const GENERATE_IMAGE_API = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`;
+            
+            // CRITICAL FIX: Use the full story as context for the image prompt
+            const imagePrompt = `A high-quality, vibrant children's book illustration in a friendly, cheerful style, depicting the main action and characters described in this story: "${storyText}". The setting should be a Nigerian village.`;
             
             const payload = {
                 instances: { prompt: imagePrompt },
@@ -261,7 +222,49 @@
             return base64Data ? `data:image/png;base64,${base64Data}` : '';
         }
 
+        // --- Audio Generation Helpers ---
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const wavData = new ArrayBuffer(44 + pcmData.length * 2);
+            const view = new DataView(wavData);
+            let offset = 0;
+
+            function writeString(str) { for (let i = 0; i < str.length; i++) { view.setUint8(offset++, str.charCodeAt(i)); } }
+            function writeUint32(val) { view.setUint32(offset, val, true); offset += 4; }
+            function writeUint16(val) { view.setUint16(offset, val, true); offset += 2; }
+
+            writeString('RIFF');
+            writeUint32(36 + pcmData.length * 2);
+            writeString('WAVE');
+            writeString('fmt ');
+            writeUint32(16);
+            writeUint16(1);
+            writeUint16(1);
+            writeUint32(sampleRate);
+            writeUint32(sampleRate * 2);
+            writeUint16(2);
+            writeUint16(16);
+            writeString('data');
+            writeUint32(pcmData.length * 2);
+
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(offset, pcmData[i], true);
+                offset += 2;
+            }
+            return new Blob([view], { type: 'audio/wav' });
+        }
+        
         async function generateAudio(text) {
+            const GENERATE_AUDIO_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
             const payload = {
                 contents: [{ parts: [{ text: text }] }],
                 generationConfig: {
@@ -293,68 +296,9 @@
             }
             return null;
         }
-
-        function base64ToArrayBuffer(base64) {
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function pcmToWav(pcmData, sampleRate) {
-            const wavData = new ArrayBuffer(44 + pcmData.length * 2);
-            const view = new DataView(wavData);
-            let offset = 0;
-
-            function writeString(str) {
-                for (let i = 0; i < str.length; i++) {
-                    view.setUint8(offset++, str.charCodeAt(i));
-                }
-            }
-
-            function writeUint32(val) {
-                view.setUint32(offset, val, true);
-                offset += 4;
-            }
-
-            function writeUint16(val) {
-                view.setUint16(offset, val, true);
-                offset += 2;
-            }
-
-            writeString('RIFF');
-            writeUint32(36 + pcmData.length * 2);
-            writeString('WAVE');
-            writeString('fmt ');
-            writeUint32(16);
-            writeUint16(1);
-            writeUint16(1);
-            writeUint32(sampleRate);
-            writeUint32(sampleRate * 2);
-            writeUint16(2);
-            writeUint16(16);
-            writeString('data');
-            writeUint32(pcmData.length * 2);
-
-            for (let i = 0; i < pcmData.length; i++) {
-                view.setInt16(offset, pcmData[i], true);
-                offset += 2;
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        }
         
         // Event Listeners
         generateButton.addEventListener('click', async () => {
-            // Check for API key before attempting API calls
-            if (!API_KEY) {
-                showMessage("Please enter and save your API key first.", "error");
-                return;
-            }
-
             const promptValue = promptInput.value.trim();
             const phonicSound = phonicsSelect.value;
             let combinedPrompt;
@@ -373,36 +317,55 @@
             // Hide previous results and show loader
             resultContainer.classList.add('hidden');
             loader.classList.remove('hidden');
+            audioButton.disabled = true;
+
+            let story = 'Failed to generate story.';
+            let imageBase64 = "https://placehold.co/600x400/3182CE/FFFFFF?text=Generating+Image";
+            let audioUrl = null;
 
             try {
-                // Generate content in sequence
-                const story = await generateStory(combinedPrompt);
-                const imageBase64 = await generateImage(story);
+                // 1. Generate Story
+                story = await generateStory(combinedPrompt);
+                storyContent = story.replace(/\*\*/g, ''); // Clean up any lingering markdown bolding
 
-                storyContent = story.replace(/\*\*/g, ''); // Remove Markdown bolding
                 storyText.innerHTML = storyContent.replace(/\n/g, '<br><br>');
+                
+                // 2. Generate Image (Now based on the full story content)
+                try {
+                    storyImage.src = "https://placehold.co/600x400/3182CE/FFFFFF?text=Generating+Image...";
+                    imageBase64 = await generateImage(storyContent);
+                } catch(e) {
+                    console.error("Image generation failed:", e);
+                    showMessage("Image generation failed. Story is displayed.", "error");
+                }
+                
                 storyImage.src = imageBase64 || "https://placehold.co/600x400/3182CE/FFFFFF?text=Image+Not+Available";
+                
+                // 3. Generate Audio (Handled in separate try-catch)
+                try {
+                    audioUrl = await generateAudio(storyContent);
+                } catch(e) {
+                    console.error("Audio generation failed:", e);
+                    showMessage("Audio generation failed.", "error");
+                }
 
-                // Generate audio after the story is received
-                const audioUrl = await generateAudio(storyContent);
                 if (audioUrl) {
                     if (audioInstance) audioInstance.pause();
                     audioInstance = new Audio(audioUrl);
                     audioButton.disabled = false;
                 } else {
                     audioButton.disabled = true;
-                    showMessage("Audio generation failed.", "error");
                 }
-
+                
                 // Show results
                 loader.classList.add('hidden');
                 resultContainer.classList.remove('hidden');
 
             } catch (error) {
-                console.error("Error during generation:", error);
+                console.error("Critical error during story generation:", error);
                 loader.classList.add('hidden');
                 resultContainer.classList.add('hidden');
-                showMessage("An error occurred during generation. Please try again.", "error");
+                showMessage("A critical error occurred. Please try a simpler prompt.", "error");
             }
         });
 
