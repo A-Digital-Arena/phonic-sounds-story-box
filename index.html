@@ -205,8 +205,8 @@
         async function generateImage(storyText) {
             const GENERATE_IMAGE_API = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${API_KEY}`;
             
-            // CRITICAL FIX: Use the full story as context for the image prompt
-            const imagePrompt = `A high-quality, vibrant children's book illustration in a friendly, cheerful style, depicting the main action and characters described in this story: "${storyText}". The setting should be a Nigerian village.`;
+            // FINAL IMAGE FIX: Simplified and more direct prompt instruction
+            const imagePrompt = `A high-quality, vibrant children's book illustration in a cheerful style. The image must clearly depict the characters and actions described in this story: "${storyText}". Ensure the setting resembles a Nigerian village.`;
             
             const payload = {
                 instances: { prompt: imagePrompt },
